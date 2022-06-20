@@ -5,7 +5,7 @@ import (
     "database/sql"
 
     _ "github.com/go-sql-driver/mysql"
-    // "fmt"
+	"encoding/base64"
     // "context"
 	// "net/http"
 	// "io/ioutil"
@@ -16,7 +16,6 @@ import (
 
 func main() {
 	s := "Foo"
-
 	hsha256 := sha256.Sum256([]byte(s))
 
 	fmt.Printf("SHA256: %x\n", hsha256)
@@ -32,7 +31,11 @@ func main() {
     // executing
     defer db.Close()
 
-	insert, err := db.Query("call db.create_user('Test', %x, 'TEST', 'TETS' )", hsha256)
+	myhash := base64.StdEncoding.EncodeToString(hsha256[:])
+
+	mystring:= string("call db.create_user('Test1', '" + myhash + "', 'TEST', 'TETS' )")
+
+	insert, err := db.Query(mystring)
 
 	if err != nil {
         panic(err.Error())
