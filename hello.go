@@ -1,6 +1,7 @@
 package main
 import (
-	//"fmt"
+	"crypto/sha256"
+	"fmt"
     "database/sql"
 
     _ "github.com/go-sql-driver/mysql"
@@ -14,6 +15,12 @@ import (
 //var ctx = context.Background()
 
 func main() {
+	s := "Foo"
+
+	hsha256 := sha256.Sum256([]byte(s))
+
+	fmt.Printf("SHA256: %x\n", hsha256)
+
 	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/db")
 
 	// if there is an error opening the connection, handle it
@@ -25,7 +32,7 @@ func main() {
     // executing
     defer db.Close()
 
-	insert, err := db.Query("call db.create_user('Test', '123', 'TEST', 'TETS' )")
+	insert, err := db.Query("call db.create_user('Test', %x, 'TEST', 'TETS' )", hsha256)
 
 	if err != nil {
         panic(err.Error())
