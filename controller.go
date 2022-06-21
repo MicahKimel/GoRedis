@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"io/ioutil"
 	"github.com/go-redis/redis/v8"
+	"github.com/MicahKimel/GoRedis/model"
 )
 
 var ctx = context.Background()
@@ -16,7 +17,7 @@ var ctx = context.Background()
 func main() {
 	http.HandleFunc("/", func(rw http.ResponseWriter, r*http.Request){
 		d, _ := ioutil.ReadAll(r.Body)
-		rdb := redis.NewClient(&redis.Options{
+		rdb := redis.NewClient(&redis.Options{ßß
 			Addr:     "localhost:6379",
 			Password: "", // no password set
 			DB:       0,  // use default DB
@@ -46,7 +47,7 @@ func main() {
 	http.HandleFunc("/createuser", func(rw http.ResponseWriter, r*http.Request){
 		//next cast input body to type user and post
 		fmt.Print("CREATE USER CALLED\n")
-		user := &User{}
+		user := &data.User{}
 		err := user.FromJSON(r.Body)
 		fmt.Printf("USER: %x\n", user)
 		if err != nil {
