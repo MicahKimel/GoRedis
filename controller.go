@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"io/ioutil"
 	"github.com/go-redis/redis/v8"
-	"github.com/MicahKimel/GoRedis/model"
+	"github.com/MicahKimel/GoRedis/data"
 )
 
 var ctx = context.Background()
