@@ -6,20 +6,12 @@ import (
 	"context"
     _ "github.com/go-sql-driver/mysql"
 	"encoding/base64"
-	"encoding/json"
 	"net/http"
 	"io/ioutil"
 	"github.com/go-redis/redis/v8"
 )
 
 var ctx = context.Background()
-
-type User struct {
-	username string
-	password string
-	phone string
-	email string
-}
 
 func main() {
 	http.HandleFunc("/", func(rw http.ResponseWriter, r*http.Request){
@@ -53,9 +45,13 @@ func main() {
 	})
 	http.HandleFunc("/createuser", func(rw http.ResponseWriter, r*http.Request){
 		//next cast input body to type user and post
+		fmt.Print("CREATE USER CALLED\n")
 		user := &User{}
-		d, _ := ioutil.ReadAll(r.Body)
-		json.Unmarshal(d, &user)
+		err := user.FromJSON(r.Body)
+		fmt.Printf("USER: %x\n", user)
+		if err != nil {
+			http.Error(rw, "Unable to unmarshal json", http.StatusBadRequest)
+		}
 		hsha256 := sha256.Sum256([]byte(user.password))
 
 		fmt.Printf("SHA256: %x\n", hsha256)
