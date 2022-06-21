@@ -6,19 +6,20 @@ import (
 	"context"
     _ "github.com/go-sql-driver/mysql"
 	"encoding/base64"
-	 "net/http"
+	"encoding/json"
+	"net/http"
 	"io/ioutil"
 	"github.com/go-redis/redis/v8"
 )
 
 var ctx = context.Background()
 
-// struct user() {
-// 	username string
-// 	password string
-// 	phone string
-// 	email string
-// }
+type User struct {
+	username string
+	password string
+	phone string
+	email string
+}
 
 func main() {
 	http.HandleFunc("/", func(rw http.ResponseWriter, r*http.Request){
@@ -52,9 +53,10 @@ func main() {
 	})
 	http.HandleFunc("/createuser", func(rw http.ResponseWriter, r*http.Request){
 		//next cast input body to type user and post
-		//d, _ := ioutil.ReadAll(r.Body)
-		s := "Foo"
-		hsha256 := sha256.Sum256([]byte(s))
+		user := &User{}
+		d, _ := ioutil.ReadAll(r.Body)
+		json.Unmarshal(d, &user)
+		hsha256 := sha256.Sum256([]byte(user.password))
 
 		fmt.Printf("SHA256: %x\n", hsha256)
 
@@ -71,7 +73,8 @@ func main() {
 
 		myhash := base64.StdEncoding.EncodeToString(hsha256[:])
 
-		mystring:= string("call db.create_user('Test1', '" + myhash + "', 'TEST', 'TETS' )")
+		mystring:= string("call db.create_user('" + user.username + `', 
+		'` + myhash + "', '" + user.phone + "', '" + user.email + "' )")
 
 		insert, err := db.Query(mystring)
 
