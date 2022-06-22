@@ -55,10 +55,8 @@ func main() {
 			http.Error(rw, "Unable to unmarshal json", http.StatusBadRequest)
 		}
 		fmt.Printf("USER: %x\n", user)
-		
-		password = user.getField("password")
 
-		hsha256 := sha256.Sum256([]byte(string(password)))
+		hsha256 := sha256.Sum256([]byte(string(user.Password)))
 
 		fmt.Printf("SHA256: %x\n", hsha256)
 
@@ -75,8 +73,8 @@ func main() {
 
 		myhash := base64.StdEncoding.EncodeToString(hsha256[:])
 
-		mystring:= string("call db.create_user('" + string(password) + `', 
-		'` + myhash + "', '" + string(password) + "', '" + string(password) + "' )")
+		mystring:= string("call db.create_user('" + string(user.Username) + `', 
+		'` + myhash + "', '" + string(user.Phone) + "', '" + string(user.Email) + "' )")
 
 		fmt.Print(mystring)
 
