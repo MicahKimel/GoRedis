@@ -1,4 +1,4 @@
-module example/hello
+module github.com/MicahKimel/GoRedis
 
 go 1.18
 

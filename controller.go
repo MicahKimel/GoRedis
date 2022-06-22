@@ -1,4 +1,5 @@
 package main
+
 import (
 	"crypto/sha256"
 	"fmt"
@@ -17,7 +18,7 @@ var ctx = context.Background()
 func main() {
 	http.HandleFunc("/", func(rw http.ResponseWriter, r*http.Request){
 		d, _ := ioutil.ReadAll(r.Body)
-		rdb := redis.NewClient(&redis.Options{ßß
+		rdb := redis.NewClient(&redis.Options{
 			Addr:     "localhost:6379",
 			Password: "", // no password set
 			DB:       0,  // use default DB
@@ -49,11 +50,15 @@ func main() {
 		fmt.Print("CREATE USER CALLED\n")
 		user := &data.User{}
 		err := user.FromJSON(r.Body)
-		fmt.Printf("USER: %x\n", user)
 		if err != nil {
+			fmt.Print("Unable to unmarshal json\n")
 			http.Error(rw, "Unable to unmarshal json", http.StatusBadRequest)
 		}
-		hsha256 := sha256.Sum256([]byte(user.password))
+		fmt.Printf("USER: %x\n", user)
+		
+		password = user.getField("password")
+
+		hsha256 := sha256.Sum256([]byte(string(password)))
 
 		fmt.Printf("SHA256: %x\n", hsha256)
 
@@ -70,8 +75,10 @@ func main() {
 
 		myhash := base64.StdEncoding.EncodeToString(hsha256[:])
 
-		mystring:= string("call db.create_user('" + user.username + `', 
-		'` + myhash + "', '" + user.phone + "', '" + user.email + "' )")
+		mystring:= string("call db.create_user('" + string(password) + `', 
+		'` + myhash + "', '" + string(password) + "', '" + string(password) + "' )")
+
+		fmt.Print(mystring)
 
 		insert, err := db.Query(mystring)
 
