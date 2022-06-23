@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"fmt"
     "database/sql"
+	"log"
 	"context"
     _ "github.com/go-sql-driver/mysql"
 	"encoding/base64"
@@ -15,7 +16,15 @@ import (
 
 var ctx = context.Background()
 
-func redisTest(rw http.ResponseWriter, r *http.Request){
+type Users struct {
+	l *log.Logger
+}
+
+func NewUsers(l *log.Logger) *Users {
+	return &Users{l}
+}
+
+func (u *Users) redisTest(rw http.ResponseWriter, r http.Request){
 	d, _ := ioutil.ReadAll(r.Body)
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
@@ -45,7 +54,7 @@ func redisTest(rw http.ResponseWriter, r *http.Request){
 	}
 }
 
-func addUser(rw http.ResponseWriter, r *http.Request) {
+func (u *Users) addUser(rw http.ResponseWriter, r *http.Request) {
 	fmt.Print("CREATE USER CALLED\n")
 	user := &data.User{}
 	err := user.FromJSON(r.Body)
