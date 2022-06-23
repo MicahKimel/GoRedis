@@ -25,10 +25,10 @@ func main() {
 	sm := mux.NewRouter()
 
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/", uh.redisTest)
+	getRouter.HandleFunc("/", uh.RedisTest)
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
-	postRouter.HandleFunc("/user", uh.addUser)
+	postRouter.HandleFunc("/user", uh.AddUser)
 
 	s := http.Server{
 		Addr:         "localhost:9090",      // configure the bind address

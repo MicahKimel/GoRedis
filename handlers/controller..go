@@ -24,7 +24,7 @@ func NewUsers(l *log.Logger) *Users {
 	return &Users{l}
 }
 
-func (u *Users) redisTest(rw http.ResponseWriter, r http.Request){
+func (u *Users) RedisTest(rw http.ResponseWriter, r *http.Request){
 	d, _ := ioutil.ReadAll(r.Body)
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
@@ -54,7 +54,7 @@ func (u *Users) redisTest(rw http.ResponseWriter, r http.Request){
 	}
 }
 
-func (u *Users) addUser(rw http.ResponseWriter, r *http.Request) {
+func (u *Users) AddUser(rw http.ResponseWriter, r *http.Request) {
 	fmt.Print("CREATE USER CALLED\n")
 	user := &data.User{}
 	err := user.FromJSON(r.Body)
