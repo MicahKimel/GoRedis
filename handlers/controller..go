@@ -39,6 +39,7 @@ func NewUsers(l *log.Logger) *Users {
 }
 
 func (u *Users) RedisTest(rw http.ResponseWriter, r *http.Request){
+	fmt.Print("REDIS TEST FUNC")
 	d, _ := ioutil.ReadAll(r.Body)
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
@@ -150,7 +151,8 @@ func (u *Users) Authenticate(rw http.ResponseWriter, r *http.Request) {
 		fmt.Print(err)
 	}
 	if (name == user){
-		token, err := getToken(name)
+		myjwt := jwt.NewJwt(name)
+		token, err := myjwt.GetToken(name)
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
 			rw.Write([]byte("Error generating JWT token: " + err.Error()))

@@ -2,7 +2,15 @@ package jwt
 
 import jwt "github.com/golang-jwt/jwt"
 
-func getToken(name string) (string, error) {
+type Jwt struct {
+	Name string
+}
+
+func NewJwt(name string) *Jwt {
+	return &Jwt{name}
+}
+
+func (j *Jwt) GetToken(name string) (string, error) {
 	signingKey := []byte("keymaker")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"name": name,
@@ -12,7 +20,7 @@ func getToken(name string) (string, error) {
 	return tokenString, err
 }
 
-func verifyToken(tokenString string) (jwt.Claims, error) {
+func (j *Jwt) VerifyToken(tokenString string) (jwt.Claims, error) {
 	signingKey := []byte("keymaker")
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return signingKey, nil

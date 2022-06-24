@@ -6,10 +6,14 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"os"
+	"fmt"
 	"os/signal"
 	"time"
+	"strings"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/MicahKimel/GoRedis/handlers"
+	myjwt "github.com/MicahKimel/GoRedis/jwt"
+	"github.com/golang-jwt/jwt"
 )
 
 //var bindAddress = env.String("BIND_ADDRESS", false, ":9090", "Bind address for the server")
@@ -24,18 +28,21 @@ func main() {
 
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
-	getRouter := sm.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/", uh.RedisTest)
-	getRouter.HandleFunc("/authenticate", uh.Authenticate)
+	getUnauth := sm.Methods(http.MethodGet).Subrouter()
+	getUnauth.HandleFunc("/authenticate", uh.Authenticate)
 
-	postRouter := sm.Methods(http.MethodPost).Subrouter()
-	postRouter.HandleFunc("/createaccount", uh.AddUser)
+	postUnauth := sm.Methods(http.MethodPost).Subrouter()
+	postUnauth.HandleFunc("/createaccount", uh.AddUser)
+
+	getR := sm.Methods(http.MethodGet).Subrouter()
+	getR.HandleFunc("/id/{id}", uh.RedisTest)
+	getR.Use(authMiddleware)
 
 	opts := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
 	sh := middleware.Redoc(opts, nil)
 
-	getRouter.Handle("/docs", sh)
-	getRouter.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
+	getUnauth.Handle("/docs", sh)
+	getUnauth.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
 	s := http.Server{
 		Addr:         "localhost:9090",      // configure the bind address
@@ -69,6 +76,33 @@ func main() {
 	// gracefully shutdown the server, waiting max 30 seconds for current operations to complete
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	s.Shutdown(ctx)
+}
+
+func authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Print("Auth Called \n")
+		tokenString := r.Header.Get("Authorization")
+		if len(tokenString) == 0 {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Missing Authorization Header"))
+			return
+		}
+		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+		tmpjwt := myjwt.NewJwt(mux.Vars(r)["id"])
+		claims, err := tmpjwt.VerifyToken(tokenString)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Error verifying JWT token: " + err.Error()))
+			return
+		}
+		name := claims.(jwt.MapClaims)["name"].(string)
+		role := claims.(jwt.MapClaims)["role"].(string)
+
+		r.Header.Set("name", name)
+		r.Header.Set("role", role)
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 
