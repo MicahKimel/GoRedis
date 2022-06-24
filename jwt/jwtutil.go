@@ -1,4 +1,4 @@
-package main
+package jwt
 
 import jwt "github.com/golang-jwt/jwt"
 
