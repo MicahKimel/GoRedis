@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"time"
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/MicahKimel/GoRedis/handlers"
 )
 
@@ -23,12 +24,20 @@ func main() {
 
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
-
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/user", uh.GetUser)
+
+
 	getRouter.HandleFunc("/", uh.RedisTest)
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.HandleFunc("/user", uh.AddUser)
+
+	opts := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
+	sh := middleware.Redoc(opts, nil)
+
+	getRouter.Handle("/docs", sh)
+	getRouter.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
 	s := http.Server{
 		Addr:         "localhost:9090",      // configure the bind address

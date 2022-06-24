@@ -1,3 +1,16 @@
+// Package Classification of API
+//
+// Documentation for API
+// Schemes: http
+// BasePath: /
+// Version 1.0
+//
+// Consumes:
+// - application/json
+//
+// Produces:
+// - application/json
+// swagger:meta
 package handlers
 
 import (
@@ -62,7 +75,6 @@ func (u *Users) AddUser(rw http.ResponseWriter, r *http.Request) {
 		fmt.Print("Unable to unmarshal json\n")
 		http.Error(rw, "Unable to unmarshal json", http.StatusBadRequest)
 	}
-	fmt.Printf("USER: %x\n", user)
 
 	hsha256 := sha256.Sum256([]byte(string(user.Password)))
 
@@ -93,4 +105,48 @@ func (u *Users) AddUser(rw http.ResponseWriter, r *http.Request) {
 	}
 	// be careful deferring Queries if you are using transactions
 	defer insert.Close()
+}
+
+func (u *Users) GetUser(rw http.ResponseWriter, r *http.Request) {
+	fmt.Print("GET USER CALLED\n")
+	user := r.URL.Query().Get("user")
+	password := r.URL.Query().Get("password")
+	fmt.Print("PASSWORD: " + password + "\n")
+
+	hsha256 := sha256.Sum256([]byte(string(password)))
+
+	fmt.Printf("SHA256: %x\n", hsha256)
+
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/db")
+
+	// if there is an error opening the connection, handle it
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// defer the close till after the main function has finished
+	// executing
+	defer db.Close()
+
+	myhash := base64.StdEncoding.EncodeToString(hsha256[:])
+
+	mystring := "call db.get_user('" + string(user) + `', '` + string(myhash) + "' );"
+
+	fmt.Print(mystring)
+
+	var name string
+
+	row := db.QueryRow(mystring)
+	err = row.Scan(&name)
+
+	if err != nil {
+		fmt.Print("ERROR: Bad Username or Password\n")
+		http.Error(rw, "ERROR: Bad Username or Password", http.StatusBadRequest)
+	} else {
+		fmt.Print(name)
+		fmt.Print(err)
+	}
+	// be careful deferring Queries if you are using transactions
+	defer db.Close()
+	fmt.Fprint(rw, name)
 }
