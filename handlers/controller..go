@@ -25,6 +25,7 @@ import (
 	"io/ioutil"
 	"github.com/go-redis/redis/v8"
 	"github.com/MicahKimel/GoRedis/data"
+	"github.com/MicahKimel/GoRedis/jwt"
 )
 
 var ctx = context.Background()
@@ -107,7 +108,7 @@ func (u *Users) AddUser(rw http.ResponseWriter, r *http.Request) {
 	defer insert.Close()
 }
 
-func (u *Users) GetUser(rw http.ResponseWriter, r *http.Request) {
+func (u *Users) Authenticate(rw http.ResponseWriter, r *http.Request) {
 	fmt.Print("GET USER CALLED\n")
 	user := r.URL.Query().Get("user")
 	password := r.URL.Query().Get("password")
@@ -138,6 +139,8 @@ func (u *Users) GetUser(rw http.ResponseWriter, r *http.Request) {
 
 	row := db.QueryRow(mystring)
 	err = row.Scan(&name)
+	// be careful deferring Queries if you are using transactions
+	defer db.Close()
 
 	if err != nil {
 		fmt.Print("ERROR: Bad Username or Password\n")
@@ -146,7 +149,19 @@ func (u *Users) GetUser(rw http.ResponseWriter, r *http.Request) {
 		fmt.Print(name)
 		fmt.Print(err)
 	}
-	// be careful deferring Queries if you are using transactions
-	defer db.Close()
-	fmt.Fprint(rw, name)
+	if (name == user){
+		token, err := getToken(name)
+		if err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+			rw.Write([]byte("Error generating JWT token: " + err.Error()))
+		} else {
+			rw.Header().Set("Authorization", "Bearer "+token)
+			rw.WriteHeader(http.StatusOK)
+			rw.Write([]byte("Token: " + token))
+		}
+	} else {
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write([]byte("Name and password do not match"))
+		return
+	}
 }

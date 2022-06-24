@@ -25,13 +25,11 @@ func main() {
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/user", uh.GetUser)
-
-
 	getRouter.HandleFunc("/", uh.RedisTest)
+	getRouter.HandleFunc("/authenticate", uh.Authenticate)
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
-	postRouter.HandleFunc("/user", uh.AddUser)
+	postRouter.HandleFunc("/createaccount", uh.AddUser)
 
 	opts := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
 	sh := middleware.Redoc(opts, nil)
