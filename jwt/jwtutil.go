@@ -1,6 +1,8 @@
 package jwt
 
-import jwt "github.com/golang-jwt/jwt"
+import (
+	jwt "github.com/golang-jwt/jwt"
+)
 
 type Jwt struct {
 	Name string
@@ -11,7 +13,7 @@ func NewJwt(name string) *Jwt {
 }
 
 func (j *Jwt) GetToken(name string) (string, error) {
-	signingKey := []byte("keymaker")
+	signingKey := j.GenKey(name)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"name": name,
 		"role": "redpill",
@@ -21,7 +23,7 @@ func (j *Jwt) GetToken(name string) (string, error) {
 }
 
 func (j *Jwt) VerifyToken(tokenString string) (jwt.Claims, error) {
-	signingKey := []byte("keymaker")
+	signingKey := j.GetKey(tokenString)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return signingKey, nil
 	})
