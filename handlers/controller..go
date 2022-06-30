@@ -14,18 +14,19 @@
 package handlers
 
 import (
-	"crypto/sha256"
-	"fmt"
-    "database/sql"
-	"log"
 	"context"
-    _ "github.com/go-sql-driver/mysql"
+	"crypto/sha256"
+	"database/sql"
 	"encoding/base64"
-	"net/http"
+	"fmt"
 	"io/ioutil"
-	"github.com/go-redis/redis/v8"
+	"log"
+	"net/http"
+
 	"github.com/MicahKimel/GoRedis/data"
 	"github.com/MicahKimel/GoRedis/jwt"
+	"github.com/go-redis/redis/v8"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var ctx = context.Background()
@@ -38,8 +39,9 @@ func NewUsers(l *log.Logger) *Users {
 	return &Users{l}
 }
 
-func (u *Users) RedisTest(rw http.ResponseWriter, r *http.Request){
-	fmt.Print("REDIS TEST FUNC")
+func (u *Users) RedisTest(rw http.ResponseWriter, r *http.Request) {
+	setupCORS(&rw, r)
+	fmt.Print("REDIS TEST FUNC \n")
 	d, _ := ioutil.ReadAll(r.Body)
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
@@ -70,12 +72,17 @@ func (u *Users) RedisTest(rw http.ResponseWriter, r *http.Request){
 }
 
 func (u *Users) AddUser(rw http.ResponseWriter, r *http.Request) {
+	setupCORS(&rw, r)
+	if (*r).Method == "OPTIONS" {
+		return
+	}
 	fmt.Print("CREATE USER CALLED\n")
 	user := &data.User{}
 	err := user.FromJSON(r.Body)
 	if err != nil {
 		fmt.Print("Unable to unmarshal json\n")
 		http.Error(rw, "Unable to unmarshal json", http.StatusBadRequest)
+		return
 	}
 
 	hsha256 := sha256.Sum256([]byte(string(user.Password)))
@@ -95,7 +102,7 @@ func (u *Users) AddUser(rw http.ResponseWriter, r *http.Request) {
 
 	myhash := base64.StdEncoding.EncodeToString(hsha256[:])
 
-	mystring:= string("call db.create_user('" + string(user.Username) + `', 
+	mystring := string("call db.create_user('" + string(user.Username) + `', 
 	'` + myhash + "', '" + string(user.Phone) + "', '" + string(user.Email) + "' )")
 
 	fmt.Print(mystring)
@@ -110,6 +117,7 @@ func (u *Users) AddUser(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (u *Users) Authenticate(rw http.ResponseWriter, r *http.Request) {
+	setupCORS(&rw, r)
 	fmt.Print("GET USER CALLED\n")
 	user := r.URL.Query().Get("user")
 	password := r.URL.Query().Get("password")
@@ -150,7 +158,7 @@ func (u *Users) Authenticate(rw http.ResponseWriter, r *http.Request) {
 		fmt.Print(name)
 		fmt.Print(err)
 	}
-	if (name == user){
+	if name == user {
 		myjwt := jwt.NewJwt(name)
 		token, err := myjwt.GetToken(name)
 		if err != nil {
@@ -166,4 +174,10 @@ func (u *Users) Authenticate(rw http.ResponseWriter, r *http.Request) {
 		rw.Write([]byte("Name and password do not match"))
 		return
 	}
+}
+
+func setupCORS(w *http.ResponseWriter, req *http.Request) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }

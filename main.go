@@ -1,19 +1,20 @@
 package main
 
 import (
-	"net/http"
 	"context"
-	"github.com/gorilla/mux"
-	"log"
-	"os"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
 	"os/signal"
-	"time"
 	"strings"
-	"github.com/go-openapi/runtime/middleware"
+	"time"
+
 	"github.com/MicahKimel/GoRedis/handlers"
 	myjwt "github.com/MicahKimel/GoRedis/jwt"
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/golang-jwt/jwt"
+	"github.com/gorilla/mux"
 )
 
 //var bindAddress = env.String("BIND_ADDRESS", false, ":9090", "Bind address for the server")
@@ -28,14 +29,17 @@ func main() {
 
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
-	getUnauth := sm.Methods(http.MethodGet).Subrouter()
+	getUnauth := sm.Methods(http.MethodGet, "OPTIONS").Subrouter()
 	getUnauth.HandleFunc("/authenticate", uh.Authenticate)
+	//getUnauth.Use(addCors)
 
-	postUnauth := sm.Methods(http.MethodPost).Subrouter()
+	postUnauth := sm.Methods(http.MethodPost, "OPTIONS").Subrouter()
 	postUnauth.HandleFunc("/createaccount", uh.AddUser)
+	//postUnauth.Use(addCors)
 
-	getR := sm.Methods(http.MethodGet).Subrouter()
+	getR := sm.Methods(http.MethodGet, "OPTIONS").Subrouter()
 	getR.HandleFunc("/id/{id}", uh.RedisTest)
+	//getR.Use(addCors)
 	getR.Use(authMiddleware)
 
 	opts := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
@@ -45,7 +49,7 @@ func main() {
 	getUnauth.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
 	s := http.Server{
-		Addr:         "localhost:9090",      // configure the bind address
+		Addr:         "localhost:9090",  // configure the bind address
 		Handler:      sm,                // set the default handler
 		ErrorLog:     l,                 // set the logger for the server
 		ReadTimeout:  5 * time.Second,   // max time to read request from the client
@@ -63,7 +67,7 @@ func main() {
 			os.Exit(1)
 		}
 	}()
-	
+
 	// trap sigterm or interupt and gracefully shutdown the server
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -104,6 +108,3 @@ func authMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
-
-
-
