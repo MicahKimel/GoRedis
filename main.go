@@ -31,15 +31,16 @@ func main() {
 	sm := mux.NewRouter()
 	getUnauth := sm.Methods(http.MethodGet, "OPTIONS").Subrouter()
 	getUnauth.HandleFunc("/authenticate", uh.Authenticate)
-	//getUnauth.Use(addCors)
 
 	postUnauth := sm.Methods(http.MethodPost, "OPTIONS").Subrouter()
 	postUnauth.HandleFunc("/createaccount", uh.AddUser)
-	//postUnauth.Use(addCors)
+
+	postR := sm.Methods(http.MethodPost, "OPTIONS").Subrouter()
+	postR.HandleFunc("/group", uh.AddGroup)
+	postR.Use(authMiddleware)
 
 	getR := sm.Methods(http.MethodGet, "OPTIONS").Subrouter()
 	getR.HandleFunc("/id/{id}", uh.RedisTest)
-	//getR.Use(addCors)
 	getR.Use(authMiddleware)
 
 	opts := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
