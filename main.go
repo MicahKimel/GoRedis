@@ -1,3 +1,4 @@
+//go:generate swagger generate spec
 package main
 
 import (
@@ -43,11 +44,16 @@ func main() {
 	getR.HandleFunc("/id/{id}", uh.RedisTest)
 	getR.Use(authMiddleware)
 
-	opts := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
-	sh := middleware.Redoc(opts, nil)
+	opts := middleware.SwaggerUIOpts{SpecURL: "/swagger.yaml"}
+	sh := middleware.SwaggerUI(opts, nil)
 
 	getUnauth.Handle("/docs", sh)
 	getUnauth.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
+
+	// documentation for share
+	// opts1 := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
+	// sh1 := middleware.Redoc(opts1, nil)
+	// r.Handle("/docs", sh1)
 
 	s := http.Server{
 		Addr:         "localhost:9090",  // configure the bind address

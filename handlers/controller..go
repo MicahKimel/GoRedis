@@ -1,7 +1,7 @@
 // Package Classification of API
 //
 // Documentation for API
-// Schemes: http
+// Schemes: http, https
 // BasePath: /
 // Version 1.0
 //
@@ -39,6 +39,12 @@ func NewUsers(l *log.Logger) *Users {
 	return &Users{l}
 }
 
+// swagger:route GET /id/{id}
+// Add data to redis
+//
+// responses:
+//  401: CommonError
+//  200: Enter Data into Redis
 func (u *Users) RedisTest(rw http.ResponseWriter, r *http.Request) {
 	setupCORS(&rw, r)
 	fmt.Print("REDIS TEST FUNC \n")
@@ -71,6 +77,12 @@ func (u *Users) RedisTest(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// swagger:route POST /createaccount
+// create user
+//
+// responses:
+//  401: CommonError
+//  200: User Created
 func (u *Users) AddUser(rw http.ResponseWriter, r *http.Request) {
 	setupCORS(&rw, r)
 	if (*r).Method == "OPTIONS" {
@@ -116,6 +128,14 @@ func (u *Users) AddUser(rw http.ResponseWriter, r *http.Request) {
 	defer insert.Close()
 }
 
+// swagger:route POST /group
+// create group
+//
+// security:
+// - apiKey: bearer token
+// responses:
+//  401: CommonError
+//  200: Group Created
 func (u *Users) AddGroup(rw http.ResponseWriter, r *http.Request) {
 	setupCORS(&rw, r)
 	if (*r).Method == "OPTIONS" {
@@ -151,6 +171,12 @@ func (u *Users) AddGroup(rw http.ResponseWriter, r *http.Request) {
 	defer insert.Close()
 }
 
+// swagger:route GET /authenticate
+// get token
+//
+// responses:
+//  401: CommonError
+//  200: Authenticated
 func (u *Users) Authenticate(rw http.ResponseWriter, r *http.Request) {
 	setupCORS(&rw, r)
 	fmt.Print("GET USER CALLED\n")

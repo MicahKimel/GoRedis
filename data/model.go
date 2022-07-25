@@ -5,13 +5,23 @@ import (
 	"io"
 )
 
+// swagger:model User
 type User struct {
+	// Username
+	// in: body
 	Username string `json:"username"`
+	// password
+	// in: body
 	Password string `json:"password"`
-	Phone    string `json:"phone"`
-	Email    string `json:"email"`
+	// phone
+	// in: body
+	Phone string `json:"phone"`
+	// email
+	// in: body
+	Email string `json:"email"`
 }
 
+// swagger:model Users
 type Users []*User
 
 func (u *Users) ToJSON(w io.Writer) error {
@@ -24,10 +34,14 @@ func (u *User) FromJSON(r io.Reader) error {
 	return e.Decode(u)
 }
 
+// swagger:model Group
 type Group struct {
+	// group name
+	// in: body
 	Name string `json:"name"`
 }
 
+// swagger:model Groups
 type Groups []*Group
 
 func (u *Groups) ToJSON(w io.Writer) error {
