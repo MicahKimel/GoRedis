@@ -42,7 +42,7 @@ func NewUsers(l *log.Logger) *Users {
 	return &Users{l}
 }
 
-// swagger:route GET /id/{id}
+// swagger:route GET /id/{id} LoggerUser redistest
 // Add data to redis
 //
 // responses:
@@ -80,7 +80,7 @@ func (u *Users) RedisTest(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// swagger:route POST /createaccount
+// swagger:route POST /createaccount LoggerUser create
 // create user
 //
 // responses:
@@ -131,11 +131,11 @@ func (u *Users) AddUser(rw http.ResponseWriter, r *http.Request) {
 	defer insert.Close()
 }
 
-// swagger:route POST /group
+// swagger:route POST /group LoggerUser group
 // create group
 //
 // security:
-// - apiKey: bearer token
+// - key: []
 // responses:
 //  401: CommonError
 //  200: Group Created
@@ -174,7 +174,7 @@ func (u *Users) AddGroup(rw http.ResponseWriter, r *http.Request) {
 	defer insert.Close()
 }
 
-// swagger:route GET /authenticate
+// swagger:route GET /authenticate LoggerUser auth
 // get token
 //
 // responses:

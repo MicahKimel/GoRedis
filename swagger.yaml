@@ -1,10 +1,115 @@
 basePath: /
 consumes:
 - application/json
+definitions:
+  Group:
+    properties:
+      name:
+        description: |-
+          group name
+          in: body
+        type: string
+        x-go-name: Name
+    type: object
+    x-go-package: github.com/MicahKimel/GoRedis/data
+  Groups:
+    items:
+      $ref: '#/definitions/Group'
+    type: array
+    x-go-package: github.com/MicahKimel/GoRedis/data
+  LoggerUser:
+    type: object
+    x-go-name: Users
+    x-go-package: github.com/MicahKimel/GoRedis/handlers
+  User:
+    properties:
+      email:
+        description: |-
+          email
+          in: body
+        type: string
+        x-go-name: Email
+      password:
+        description: |-
+          password
+          in: body
+        type: string
+        x-go-name: Password
+      phone:
+        description: |-
+          phone
+          in: body
+        type: string
+        x-go-name: Phone
+      username:
+        description: |-
+          Username
+          in: body
+        type: string
+        x-go-name: Username
+    type: object
+    x-go-package: github.com/MicahKimel/GoRedis/data
+  Users:
+    items:
+      $ref: '#/definitions/User'
+    type: array
+    x-go-package: github.com/MicahKimel/GoRedis/data
 info:
   description: API Documentation
   title: of API
-paths: {}
+paths:
+  /authenticate:
+    get:
+      description: get token
+      operationId: auth
+      responses:
+        "200":
+          $ref: '#/responses/Authenticated'
+        "401":
+          $ref: '#/responses/CommonError'
+      tags:
+      - LoggerUser
+  /createaccount:
+    post:
+      description: create user
+      operationId: create
+      responses:
+        "200":
+          description: Created
+          schema:
+            $ref: '#/definitions/User'
+        "401":
+          $ref: '#/responses/CommonError'
+      tags:
+      - LoggerUser
+  /group:
+    post:
+      description: create group
+      operationId: group
+      responses:
+        "200":
+          description: Created
+          schema:
+            $ref: '#/definitions/Group'
+        "401":
+          $ref: '#/responses/CommonError'
+      security:
+      - key:
+        - '[]'
+      tags:
+      - LoggerUser
+  /id/{id}:
+    get:
+      description: Add data to redis
+      operationId: redistest
+      responses:
+        "200":
+          $ref: '#/responses/Enter'
+          description: Data into Redis
+        "401":
+          $ref: '#/responses/CommonError'
+      tags:
+      - LoggerUser
 produces:
 - application/json
 schemes:
