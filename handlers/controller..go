@@ -1,6 +1,6 @@
 // Package Classification of API
 //
-// Documentation for API
+// API Documentation
 // Schemes: http, https
 // BasePath: /
 // Version 1.0
@@ -29,12 +29,15 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+//context background
 var ctx = context.Background()
 
+// swagger:model LoggerUser
 type Users struct {
 	l *log.Logger
 }
 
+// swagger:model newUser
 func NewUsers(l *log.Logger) *Users {
 	return &Users{l}
 }
