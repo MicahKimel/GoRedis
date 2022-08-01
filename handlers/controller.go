@@ -160,6 +160,49 @@ func (u *Users) AddGroup(rw http.ResponseWriter, r *http.Request) {
 	// executing
 	defer db.Close()
 
+	mystring := string("call db.add_group('" + string(group.Groupid) + "','" + username + `', 
+	'` + string(group.Name) + "' )")
+
+	fmt.Print(mystring)
+
+	insert, err := db.Query(mystring)
+
+	if err != nil {
+		panic(err.Error())
+	}
+	// be careful deferring Queries if you are using transactions
+	defer insert.Close()
+}
+
+// swagger:route POST /group LoggerUser group
+// create group
+//
+// security:
+// - key: []
+// responses:
+//  401: CommonError
+//  200: Group Created
+func (u *Users) CreateGroup(rw http.ResponseWriter, r *http.Request) {
+	setupCORS(&rw, r)
+	if (*r).Method == "OPTIONS" {
+		return
+	}
+	fmt.Print("CREATE GROUP CALLED\n")
+	group := &data.Group{}
+	username := r.URL.Query().Get("name")
+	err := group.FromJSON(r.Body)
+	if err != nil {
+		fmt.Print("Unable to unmarshal json\n")
+		http.Error(rw, "Unable to unmarshal json", http.StatusBadRequest)
+		return
+	}
+
+	//open connection
+	db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/db")
+
+	// executing
+	defer db.Close()
+
 	mystring := string("call db.create_group('" + username + `', 
 	'` + string(group.Name) + "' )")
 

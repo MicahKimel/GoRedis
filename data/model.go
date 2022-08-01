@@ -39,6 +39,9 @@ type Group struct {
 	// group name
 	// in: body
 	Name string `json:"name"`
+	// group id
+	// in: body
+	Groupid string `json: Groupid`
 }
 
 // swagger:model Groups
