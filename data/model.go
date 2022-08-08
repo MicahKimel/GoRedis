@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-// swagger:model User
+// swagger:parameters User
 type User struct {
 	// Username
 	// in: body
@@ -34,14 +34,14 @@ func (u *User) FromJSON(r io.Reader) error {
 	return e.Decode(u)
 }
 
-// swagger:model Group
+// swagger:parameters Group
 type Group struct {
-	// group name
+	// name
 	// in: body
 	Name string `json:"name"`
-	// group id
+	// groupid
 	// in: body
-	Groupid string `json: Groupid`
+	Groupid string `json:"groupid"`
 }
 
 // swagger:model Groups

@@ -40,6 +40,9 @@ func main() {
 	postR.HandleFunc("/group", uh.AddGroup)
 	postR.Use(authMiddleware)
 
+	postR.HandleFunc("/creategroup", uh.CreateGroup)
+	postR.Use(authMiddleware)
+
 	getR := sm.Methods(http.MethodGet, "OPTIONS").Subrouter()
 	getR.HandleFunc("/id/{id}", uh.RedisTest)
 	getR.Use(authMiddleware)

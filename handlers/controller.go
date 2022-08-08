@@ -42,12 +42,9 @@ func NewUsers(l *log.Logger) *Users {
 	return &Users{l}
 }
 
-// swagger:route GET /id/{id} LoggerUser redistest
+// swagger:route GET /id/{id} LoggerUser
 // Add data to redis
 //
-// responses:
-//  401: CommonError
-//  200: Enter Data into Redis
 func (u *Users) RedisTest(rw http.ResponseWriter, r *http.Request) {
 	setupCORS(&rw, r)
 	fmt.Print("REDIS TEST FUNC \n")
@@ -80,12 +77,8 @@ func (u *Users) RedisTest(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// swagger:route POST /createaccount LoggerUser create
+// swagger:route POST /createaccount LoggerUser user
 // create user
-//
-// responses:
-//  401: CommonError
-//  200: User Created
 func (u *Users) AddUser(rw http.ResponseWriter, r *http.Request) {
 	setupCORS(&rw, r)
 	if (*r).Method == "OPTIONS" {
@@ -131,14 +124,8 @@ func (u *Users) AddUser(rw http.ResponseWriter, r *http.Request) {
 	defer insert.Close()
 }
 
-// swagger:route POST /group LoggerUser group
-// create group
-//
-// security:
-// - key: []
-// responses:
-//  401: CommonError
-//  200: Group Created
+// swagger:route POST /group LoggerUser Group
+// add to group
 func (u *Users) AddGroup(rw http.ResponseWriter, r *http.Request) {
 	setupCORS(&rw, r)
 	if (*r).Method == "OPTIONS" {
@@ -174,14 +161,8 @@ func (u *Users) AddGroup(rw http.ResponseWriter, r *http.Request) {
 	defer insert.Close()
 }
 
-// swagger:route POST /group LoggerUser group
+// swagger:route POST /groupcreate LoggerUser Group
 // create group
-//
-// security:
-// - key: []
-// responses:
-//  401: CommonError
-//  200: Group Created
 func (u *Users) CreateGroup(rw http.ResponseWriter, r *http.Request) {
 	setupCORS(&rw, r)
 	if (*r).Method == "OPTIONS" {
@@ -218,11 +199,12 @@ func (u *Users) CreateGroup(rw http.ResponseWriter, r *http.Request) {
 }
 
 // swagger:route GET /authenticate LoggerUser auth
-// get token
+//  Consumes:
+//  - application/json
+//  Parameters:
+//  + name: limit
+//  in: body
 //
-// responses:
-//  401: CommonError
-//  200: Authenticated
 func (u *Users) Authenticate(rw http.ResponseWriter, r *http.Request) {
 	setupCORS(&rw, r)
 	fmt.Print("GET USER CALLED\n")

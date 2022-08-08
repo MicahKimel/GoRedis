@@ -4,9 +4,15 @@ consumes:
 definitions:
   Group:
     properties:
+      groupid:
+        description: |-
+          groupid
+          in: body
+        type: string
+        x-go-name: Groupid
       name:
         description: |-
-          group name
+          name
           in: body
         type: string
         x-go-name: Name
@@ -60,56 +66,62 @@ info:
 paths:
   /authenticate:
     get:
-      description: get token
+      consumes:
+      - application/json
       operationId: auth
-      responses:
-        "200":
-          $ref: '#/responses/Authenticated'
-        "401":
-          $ref: '#/responses/CommonError'
+      parameters:
+      - in: body
+        name: limit
       tags:
       - LoggerUser
   /createaccount:
     post:
       description: create user
-      operationId: create
-      responses:
-        "200":
-          description: Created
-          schema:
-            $ref: '#/definitions/User'
-        "401":
-          $ref: '#/responses/CommonError'
+      operationId: user
       tags:
       - LoggerUser
   /group:
     post:
       description: create group
-      operationId: group
-      responses:
-        "200":
-          description: Created
-          schema:
-            $ref: '#/definitions/Group'
-        "401":
-          $ref: '#/responses/CommonError'
-      security:
-      - key:
-        - '[]'
+      operationId: Group
+      parameters:
+      - description: name
+        in: body
+        name: name
+        schema:
+          type: string
+        x-go-name: Name
+      - description: groupid
+        in: body
+        name: groupid
+        schema:
+          type: string
+        x-go-name: Groupid
+      tags:
+      - LoggerUser
+  /groupcreate:
+    post:
+      description: create group
+      operationId: Group
+      parameters:
+      - description: name
+        in: body
+        name: name
+        schema:
+          type: string
+        x-go-name: Name
+      - description: groupid
+        in: body
+        name: groupid
+        schema:
+          type: string
+        x-go-name: Groupid
       tags:
       - LoggerUser
   /id/{id}:
     get:
       description: Add data to redis
-      operationId: redistest
-      responses:
-        "200":
-          $ref: '#/responses/Enter'
-          description: Data into Redis
-        "401":
-          $ref: '#/responses/CommonError'
-      tags:
-      - LoggerUser
+      operationId: LoggerUser
 produces:
 - application/json
 schemes:
