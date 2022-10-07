@@ -6,6 +6,7 @@ This is a microserves project using goswagger, mysql, and redis. All sql tables 
 
 # Run Go
 `go build`
+
 `go run .`
 
 # Api runs at
